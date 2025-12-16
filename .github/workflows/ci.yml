@@ -32,7 +32,7 @@ jobs:
       - name: Install Linux UI Dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y libgtk-3-0 libasound2 libnss3 libx11-6 libx11-xcb1 libgl1-mesa-glx
+          sudo apt-get install -y libgtk-3-0 libasound2t64 libnss3 libx11-6 libx11-xcb1 libgl1 libgl1-mesa-dri
 
       # 3. 运行测试 (使用 Xvfb 模拟显示器)
       - name: Run Tests with Xvfb
