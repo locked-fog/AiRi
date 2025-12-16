@@ -45,7 +45,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+
       - uses: actions/setup-java@v4
         with: { java-version: '21', distribution: 'temurin', cache: 'gradle' }
-      # 尝试打包，确保编译配置无误
+
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
+
       - run: ./gradlew packageDistributionForCurrentOS
