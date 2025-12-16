@@ -79,3 +79,35 @@ ksp {
 kotlin {
     jvmToolchain(21)
 }
+
+compose {
+    desktop {
+        application {
+            mainClass = "com.lockedfog.airi.MainKt"
+
+            nativeDistributions {
+                packageName = "AiRi"
+                packageVersion = "1.0.0"
+
+                description = "Project AiRi"
+                copyright = "© 2025 Locked_Fog. All rights reserved."
+                vendor = "Locked_Fog"
+
+                targetFormats(
+                    org.jetbrains.compose.desktop.application.dsl.TargetFormat.Dmg,
+                    org.jetbrains.compose.desktop.application.dsl.TargetFormat.Msi,
+                    org.jetbrains.compose.desktop.application.dsl.TargetFormat.Deb
+                )
+
+                windows {
+                    menu = true
+                    upgradeUuid = "a9df1079-0b0b-41ee-ab76-048612617474"
+                }
+
+                macOS {
+                    bundleID = "com.lockedfog.airi"
+                }
+            }
+        }
+    }
+}
