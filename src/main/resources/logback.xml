@@ -1,0 +1,18 @@
+<configuration>
+    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <appender name="COMPOSE" class="com.lockedfog.airi.utils.ComposeAppender">
+        </appender>
+
+    <root level="INFO">
+        <appender-ref ref="STDOUT"/>
+        <appender-ref ref="COMPOSE"/>
+    </root>
+
+    <logger name="dev.lockedfog.streamllm" level="DEBUG"/>
+    <logger name="com.lockedfog.airi" level="DEBUG"/>
+</configuration>
