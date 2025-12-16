@@ -63,6 +63,8 @@ dependencies {
     @OptIn(org.jetbrains.compose.ExperimentalComposeLibrary::class)
     testImplementation(compose.desktop.uiTestJUnit4)
     testImplementation(kotlin("test"))
+    //from https://square.github.io/okhttp/
+    testImplementation("com.squareup.okhttp3:mockwebserver:5.3.2")
 }
 
 detekt {

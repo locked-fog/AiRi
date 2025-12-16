@@ -1,68 +1,138 @@
 package com.lockedfog.airi.ui
 
+import androidx.compose.desktop.ui.tooling.preview.Preview
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.BoxWithConstraints
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.foundation.layout.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.Chat
+import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
+import com.lockedfog.airi.data.config.SettingsRepository
 import com.lockedfog.airi.data.log.LogBuffer
 import com.lockedfog.airi.ui.components.TopConsole
+import com.lockedfog.airi.ui.screen.SettingsDialog
 import com.lockedfog.airi.ui.theme.AiriTheme
-import org.slf4j.LoggerFactory
-
-private val logger = LoggerFactory.getLogger("AiRi.System")
+import com.lockedfog.airi.ui.viewmodel.SettingsViewModel
+import kotlinx.coroutines.delay
 
 @Composable
+@Preview
 fun App() {
-    val logs = LogBuffer.logs
+    // 1. 初始化 ViewModel (生命周期跟随 App)
+    val scope = rememberCoroutineScope()
+    val settingsViewModel = remember { SettingsViewModel(scope) }
 
-    var isConsoleExpanded by remember { mutableStateOf(false) }
+    // 2. UI 状态控制
+    var showSettings by remember { mutableStateOf(false) }
 
+    // [核心] 监听全局配置变化，这是实现"即时换肤"的关键
+    // 一旦 Repository 中的 _configFlow 发生变化，App 会重新组合 (Recomposition)
+    val appConfig by SettingsRepository.configFlow.collectAsState()
+
+    // 3. 首次启动检查
     LaunchedEffect(Unit) {
-        logger.info("Neural Link Established.")
-        logger.info("Core Systems Online")
-        logger.info("Hello, world!")
-        logger.debug("Debug channel active")
+        if (SettingsRepository.isFirstRun()) {
+            @Suppress("MagicNumber")
+            delay(300) // 稍作延迟等待界面渲染平稳
+            showSettings = true
+        }
     }
 
-    AiriTheme {
-        BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
-            val windowHeight = maxHeight.value.toInt()
-
-            Column(modifier = Modifier.fillMaxSize()) {
-                // 1. 潜意识 (Top Console)
-                TopConsole(
-                    logs = logs,
-                    isExpanded = isConsoleExpanded,
-                    onToggleExpand = { isConsoleExpanded = !isConsoleExpanded },
-                    windowHeight = windowHeight
-                )
-
-                // 2. 表意识 (Main Chat Area)
-                // 剩余空间自动填充
-                Box(
-                    modifier = Modifier
-                        .weight(1f)
-                        .fillMaxSize()
-                        .background(MaterialTheme.colorScheme.background),
-                    contentAlignment = Alignment.Center
+    // [核心] 将配置传给 Theme
+    AiriTheme(
+        themePreset = appConfig.ui.themeColor,
+        darkTheme = appConfig.ui.isDarkMode
+    ) {
+        Box(modifier = Modifier.fillMaxSize()) {
+            // --- 主布局 (左右分栏) ---
+            Row(modifier = Modifier.fillMaxSize()) {
+                // [区域 A] 侧边栏 (ChatGPT Style)
+                NavigationRail(
+                    // 使用 surfaceVariant 作为背景，在深/浅色模式下都会有区分度
+                    containerColor = MaterialTheme.colorScheme.surfaceVariant,
+                    modifier = Modifier.width(72.dp)
                 ) {
-                    // TODO: Phase 1.5 - 实现 ChatList
-                    Text(
-                        text = "AiRi Conscious Interface\n(Waiting for User Input...)",
-                        color = MaterialTheme.colorScheme.secondary
+                    Spacer(Modifier.height(16.dp))
+
+                    // 顶部：聊天入口
+                    NavigationRailItem(
+                        selected = true,
+                        onClick = { /* TODO: Switch to Chat View */ },
+                        icon = { Icon(Icons.AutoMirrored.Filled.Chat, contentDescription = "Chat") },
+                        label = { Text("Chat") }
                     )
+
+                    Spacer(Modifier.weight(1f)) // 撑开空间
+
+                    // 底部：设置入口
+                    NavigationRailItem(
+                        selected = showSettings, // 如果弹窗打开，高亮此项
+                        onClick = { showSettings = true },
+                        icon = { Icon(Icons.Default.Settings, contentDescription = "Settings") },
+                        label = { Text("Config") }
+                    )
+
+                    Spacer(Modifier.height(16.dp))
                 }
+
+                // [区域 B] 内容区 (潜意识终端 + 表意识聊天)
+                Column(modifier = Modifier.weight(1f)) {
+                    // 1. 顶部潜意识终端 (TopConsole)
+                    var logs by remember { mutableStateOf(LogBuffer.logs.toList()) }
+                    var isConsoleExpanded by remember { mutableStateOf(false) }
+
+                    // 定时刷新日志
+                    LaunchedEffect(Unit) {
+                        while (true) {
+                            @Suppress("MagicNumber")
+                            delay(500)
+                            if (LogBuffer.logs.size != logs.size) {
+                                logs = LogBuffer.logs.toList()
+                            }
+                        }
+                    }
+
+                    TopConsole(
+                        logs = logs,
+                        isExpanded = isConsoleExpanded,
+                        onToggleExpand = { isConsoleExpanded = !isConsoleExpanded },
+                        windowHeight = 800
+                    )
+
+                    // 2. 底部聊天占位符
+                    Box(
+                        modifier = Modifier
+                            .weight(1f)
+                            .fillMaxWidth()
+                            .background(MaterialTheme.colorScheme.background),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                            Text(
+                                text = "AiRi Conscious System",
+                                style = MaterialTheme.typography.headlineMedium,
+                                color = MaterialTheme.colorScheme.onSurface
+                            )
+                            Text(
+                                text = "Waiting for Input...",
+                                style = MaterialTheme.typography.bodyLarge,
+                                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
+                            )
+                        }
+                    }
+                }
+            }
+
+            // --- 弹窗层 ---
+            if (showSettings) {
+                SettingsDialog(
+                    viewModel = settingsViewModel,
+                    onDismiss = { showSettings = false }
+                )
             }
         }
     }

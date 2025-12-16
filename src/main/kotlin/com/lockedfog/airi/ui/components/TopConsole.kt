@@ -32,10 +32,10 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.lockedfog.airi.ui.theme.ConsoleBg
-import com.lockedfog.airi.ui.theme.ConsoleText
 
 const val VISIBLE_WHEN_NOT_EXPANDED = 60
+private val ConsoleBg = Color(0xFF1E1E1E)
+private val ConsoleText = Color(0xFF00FF41)
 
 /**
  * 潜意识控制台 (The Subconscious Console)
