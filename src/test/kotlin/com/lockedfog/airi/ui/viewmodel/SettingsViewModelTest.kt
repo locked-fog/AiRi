@@ -106,7 +106,7 @@ class SettingsViewModelTest {
         val state = viewModel.state.value
         assertFalse(state.connectionSuccess, "Should not be successful if no models found")
         assertNotNull(state.connectionError)
-        assertTrue(state.connectionError!!.contains("found no models"))
+        assertTrue(state.connectionError.contains("found no models"))
     }
 
     @Test
@@ -129,7 +129,7 @@ class SettingsViewModelTest {
         assertFalse(state.connectionSuccess, "Success should be false for bad JSON")
         assertNotNull(state.connectionError)
         // 验证这是刚才修复的 Bug：应该报解析错误，而不是 "found no models"
-        assertTrue(state.connectionError!!.contains("Failed to parse"))
+        assertTrue(state.connectionError.contains("Failed to parse"))
     }
 
     @Test
@@ -148,7 +148,7 @@ class SettingsViewModelTest {
         val state = viewModel.state.value
         assertFalse(state.connectionSuccess)
         assertNotNull(state.connectionError)
-        assertTrue(state.connectionError!!.contains("HTTP 401"))
+        assertTrue(state.connectionError.contains("HTTP 401"))
     }
 
     @Test
@@ -168,7 +168,7 @@ class SettingsViewModelTest {
         val state = viewModel.state.value
         assertFalse(state.connectionSuccess)
         assertNotNull(state.connectionError)
-        assertTrue(state.connectionError!!.contains("Network Error"))
+        assertTrue(state.connectionError.contains("Network Error"))
     }
 
     @Test
