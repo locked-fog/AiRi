@@ -18,24 +18,26 @@ import com.lockedfog.airi.ui.screen.SettingsDialog
 import com.lockedfog.airi.ui.theme.AiriTheme
 import com.lockedfog.airi.ui.viewmodel.SettingsViewModel
 import kotlinx.coroutines.delay
+import org.koin.core.context.GlobalContext
+import org.koin.core.parameter.parametersOf
 
 @Composable
 @Preview
 fun App() {
-    // 1. 初始化 ViewModel (生命周期跟随 App)
-    val scope = rememberCoroutineScope()
-    val settingsViewModel = remember { SettingsViewModel(scope) }
+    val koin = GlobalContext.get()
 
-    // 2. UI 状态控制
+    val settingsRepository = remember { koin.get<SettingsRepository>() }
+    val appConfig by settingsRepository.configFlow.collectAsState()
+
+    val scope = rememberCoroutineScope()
+    val settingsViewModel = remember {
+        koin.get<SettingsViewModel> { parametersOf(scope) }
+    }
+
     var showSettings by remember { mutableStateOf(false) }
 
-    // [核心] 监听全局配置变化，这是实现"即时换肤"的关键
-    // 一旦 Repository 中的 _configFlow 发生变化，App 会重新组合 (Recomposition)
-    val appConfig by SettingsRepository.configFlow.collectAsState()
-
-    // 3. 首次启动检查
     LaunchedEffect(Unit) {
-        if (SettingsRepository.isFirstRun()) {
+        if (settingsRepository.isFirstRun()) {
             @Suppress("MagicNumber")
             delay(300) // 稍作延迟等待界面渲染平稳
             showSettings = true

@@ -25,7 +25,7 @@ import java.time.Duration
 
 class SettingsViewModel(
     private val scope: CoroutineScope,
-    private val repository: SettingsRepository = SettingsRepository,
+    private val repository: SettingsRepository,
     private val ioDispatcher: CoroutineDispatcher = Dispatchers.IO
 ) {
     private val logger = LoggerFactory.getLogger("SettingsViewModel")
