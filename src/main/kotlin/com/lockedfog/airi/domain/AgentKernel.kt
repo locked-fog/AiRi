@@ -12,7 +12,7 @@ import org.slf4j.LoggerFactory
 
 class AgentKernel(
     private val settingsRepository: SettingsRepository,
-    private val dispatcher: CoroutineDispatcher = Dispatchers.IO
+    dispatcher: CoroutineDispatcher = Dispatchers.IO
 ) {
     private val logger = LoggerFactory.getLogger("AgentKernel")
     private val scope = CoroutineScope(dispatcher + SupervisorJob())
