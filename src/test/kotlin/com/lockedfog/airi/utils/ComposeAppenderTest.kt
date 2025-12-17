@@ -88,29 +88,6 @@ class ComposeAppenderTest {
     }
 
     @Test
-    fun `should catch generic Exception and prevent crash`() {
-        // Arrange
-        val mockEvent = mockk<ILoggingEvent>()
-        every { mockEvent.timeStamp } returns System.currentTimeMillis()
-        every { mockEvent.level } returns Level.ERROR
-        every { mockEvent.loggerName } returns "TestLogger"
-        // 模拟获取消息时发生未知错误
-        every { mockEvent.formattedMessage } throws RuntimeException("Unexpected Crash")
-
-        // Act
-        appender.doAppend(mockEvent)
-
-        // Assert 1: 兜底逻辑通常不写入 LogBuffer (根据你的实现)，或者写入空
-        // 你的代码中 catch(Exception) 只是 reportError，没有调用 safelyAppendFallback
-        // 所以 Buffer 应该是空的
-        assertEquals(0, LogBuffer.logs.size)
-
-        // Assert 2: 验证 Logback 内部收到了 Critical failure 报告
-        val statusList = loggerContext.statusManager.copyOfStatusList
-        assertTrue(statusList.any { it is ErrorStatus && it.message.contains("Critical failure") })
-    }
-
-    @Test
     fun `should handle double fault in fallback mechanism`() {
         // 极端测试：当 Fallback 逻辑也失败时
         // Arrange

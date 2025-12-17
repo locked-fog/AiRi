@@ -21,32 +21,42 @@ import kotlin.test.assertTrue
 class SettingsViewModelTest {
 
     private lateinit var viewModel: SettingsViewModel
+    private lateinit var repository: SettingsRepository // [New]
     private lateinit var mockWebServer: MockWebServer
+    private lateinit var testDir: File // [New]
 
-    // 使用 UnconfinedTestDispatcher 确保协程在测试线程立即执行，消除竞态条件
     private val testDispatcher = UnconfinedTestDispatcher()
 
     @Before
     fun setup() {
-        // 1. 设置 Repository 环境 (使用临时目录)
-        SettingsRepository.configDir = File("build/tmp/vm_test")
-        SettingsRepository.configDir.deleteRecursively() // 确保干净
-        SettingsRepository.configDir.mkdirs()
-        SettingsRepository.saveConfig(AppConfig())
+        // 1. 设置 Repository 环境
+        testDir = File("build/tmp/vm_test")
+        testDir.deleteRecursively()
+        testDir.mkdirs()
+
+        // [New] 实例化 Repository 并注入
+        repository = SettingsRepository(configDir = testDir)
+        repository.saveConfig(AppConfig())
 
         // 2. 启动 MockWebServer
         mockWebServer = MockWebServer()
         mockWebServer.start()
 
-        // 3. 初始化 ViewModel (注入 testDispatcher)
+        // 3. 初始化 ViewModel (注入 repository 实例)
         val scope = kotlinx.coroutines.CoroutineScope(testDispatcher)
-        viewModel = SettingsViewModel(scope, SettingsRepository, ioDispatcher = testDispatcher)
+
+        // [Update] 构造函数变更，传入 repository
+        viewModel = SettingsViewModel(
+            scope = scope,
+            repository = repository,
+            ioDispatcher = testDispatcher
+        )
     }
 
     @After
     fun tearDown() {
         mockWebServer.shutdown()
-        SettingsRepository.configDir.deleteRecursively()
+        testDir.deleteRecursively()
     }
 
     // --- Happy Path ---

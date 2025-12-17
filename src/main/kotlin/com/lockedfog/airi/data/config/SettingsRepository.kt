@@ -9,7 +9,9 @@ import org.slf4j.LoggerFactory
 import java.io.File
 import java.io.IOException
 
-object SettingsRepository {
+open class SettingsRepository(
+    private val configDir: File = File(System.getProperty("user.home"), ".airi")
+) {
     private val logger = LoggerFactory.getLogger("SettingsRepository")
 
     private val json = Json {
@@ -18,9 +20,6 @@ object SettingsRepository {
         encodeDefaults = true
         coerceInputValues = true
     }
-
-    // 允许测试修改
-    var configDir: File = File(System.getProperty("user.home"), ".airi")
 
     private val configFile: File
         get() = File(configDir, "config.json")

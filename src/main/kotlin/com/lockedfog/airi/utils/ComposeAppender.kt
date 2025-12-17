@@ -40,10 +40,6 @@ class ComposeAppender : AppenderBase<ILoggingEvent>() {
         } catch (e: IndexOutOfBoundsException) {
             reportError("String manipulation failed", e)
             safelyAppendFallback(eventObject, "FORMAT_ERR")
-        } catch (e: Exception) {
-            // 在日志 Appender 中，我们需要捕获所有异常以防止应用崩溃，
-            // 这里使用 @Suppress 是合理的，或者依靠 addError 上报。
-            reportError("Critical failure in ComposeAppender", e)
         }
     }
 
