@@ -36,9 +36,6 @@ class ComposeAppender : AppenderBase<ILoggingEvent>() {
             // 处理时间格式化异常：使用 fallback 时间戳，不丢弃日志
             reportError("Time formatting failed for log event", e)
             safelyAppendFallback(eventObject, "TIME_ERR")
-        } catch (e: IndexOutOfBoundsException) {
-            reportError("String manipulation failed", e)
-            safelyAppendFallback(eventObject, "FORMAT_ERR")
         }
     }
 

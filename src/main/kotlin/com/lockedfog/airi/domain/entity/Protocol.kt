@@ -27,14 +27,14 @@ object Protocol {
         val executor: suspend (String) -> String
     )
 
-    private val jsonParser = Json { ignoreUnknownKeys = true}
+    private val jsonParser = Json { ignoreUnknownKeys = true }
 
     fun defineTool(
         name: String,
         description: String,
         params: List<String>,
-        block: suspend (Map<String,String>) -> String
-    ) : ToolDefinition {
+        block: suspend (Map<String, String>) -> String
+    ): ToolDefinition {
         val propertiesJson = params.joinToString(",") { param ->
             """"$param": { "type": "string" }"""
         }
@@ -54,9 +54,9 @@ object Protocol {
             parametersJson = schema
         ) {
             val jsonElement = jsonParser.parseToJsonElement(it)
-            val argsMap = mutableMapOf<String,String>()
+            val argsMap = mutableMapOf<String, String>()
 
-            if(jsonElement is JsonObject) {
+            if (jsonElement is JsonObject) {
                 jsonElement.forEach { (key, value) ->
                     argsMap[key] = value.jsonPrimitive.content
                 }
@@ -100,7 +100,7 @@ object Protocol {
         prompt.appendLine("--- STATUS ---")
         prompt.appendLine("当前时间: $now")
         prompt.appendLine("--------------")
-        if(events.isEmpty()) {
+        if (events.isEmpty()) {
             prompt.appendLine("当前无新事件。")
         } else {
             events.forEach { event ->
@@ -108,12 +108,14 @@ object Protocol {
                     .atZone(ZoneId.systemDefault())
                     .format(DateTimeFormatter.ofPattern("HH:mm:ss.SSS"))
 
-                prompt.appendLine("[$timeStr][${if(event.source == EventSource.USER) "用户输入信息" else "来自其他信号源的事件"}] ${event.content}")
+                prompt.appendLine(
+                    "[$timeStr][${if (event.source == EventSource.USER) "用户输入信息" else "来自其他信号源的事件"}] ${event.content}"
+                )
             }
         }
         prompt.appendLine("--------------")
         prompt.appendLine("基于以上内容继续你的思维。")
 
-        return  prompt.toString()
+        return prompt.toString()
     }
 }

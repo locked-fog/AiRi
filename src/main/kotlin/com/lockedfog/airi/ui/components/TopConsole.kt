@@ -82,6 +82,8 @@ fun TopConsole(
 
     // 呼吸灯动画
     val infiniteTransition = rememberInfiniteTransition()
+
+    @Suppress("MagicNumber")
     val statusColor by infiniteTransition.animateColor(
         initialValue = Color.Green,
         targetValue = Color.Green.copy(alpha = 0.3f),
@@ -91,6 +93,8 @@ fun TopConsole(
         )
     )
     // 思考时的快速闪烁
+
+    @Suppress("MagicNumber")
     val thinkingColor by infiniteTransition.animateColor(
         initialValue = Color.Yellow,
         targetValue = Color(0xFFFFD700).copy(alpha = 0.5f), // Gold
@@ -161,7 +165,7 @@ fun TopConsole(
         // --- 2. Log Content (Visible when expanded) ---
         // 只有高度足够时才渲染列表，节省性能
         if (animatedHeight > 40.dp) {
-            Box(modifier = Modifier.fillMaxSize()){
+            Box(modifier = Modifier.fillMaxSize()) {
                 LazyColumn(
                     state = listState,
                     modifier = Modifier
@@ -197,7 +201,6 @@ fun TopConsole(
                     adapter = rememberScrollbarAdapter(listState)
                 )
             }
-
         }
     }
 }

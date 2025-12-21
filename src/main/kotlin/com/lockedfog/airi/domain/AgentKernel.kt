@@ -1,7 +1,6 @@
 package com.lockedfog.airi.domain
 
 import com.lockedfog.airi.data.config.SettingsRepository
-import com.lockedfog.airi.data.log.LogBuffer
 import com.lockedfog.airi.data.log.LogBuffer.clearThinking
 import com.lockedfog.airi.data.log.LogBuffer.updateThinking
 import com.lockedfog.airi.domain.entity.Protocol
@@ -29,7 +28,6 @@ class AgentKernel(
     private val logger = LoggerFactory.getLogger("AgentKernel")
     private val scope = CoroutineScope(dispatcher + SupervisorJob())
 
-
     private val eventChannel = Channel<Protocol.InputEvent>(Channel.UNLIMITED)
     private val isKernelActive = AtomicBoolean(false)
 
@@ -50,7 +48,7 @@ class AgentKernel(
     }
 
     fun sendUserMessage(text: String) {
-        postEvent(Protocol.InputEvent(Protocol.EventSource.USER,text))
+        postEvent(Protocol.InputEvent(Protocol.EventSource.USER, text))
     }
 
     private fun startConfigObserver() {
@@ -59,7 +57,8 @@ class AgentKernel(
                 val llmConfig = config.llm
                 if (llmConfig.baseUrl != currentBaseUrl ||
                     llmConfig.apiKey != currentApiKey ||
-                    llmConfig.mainModel != currentModel) {
+                    llmConfig.mainModel != currentModel
+                ) {
                     if (llmConfig.apiKey.isNotBlank()) {
                         reloadBrain(
                             baseUrl = llmConfig.baseUrl,
@@ -106,12 +105,13 @@ class AgentKernel(
 
     private fun startMainLoop() = scope.launch {
         val memoryId = "main"
-        eventChannel.send(Protocol.InputEvent(Protocol.EventSource.PROTOCOL,"first start up"))
+        eventChannel.send(Protocol.InputEvent(Protocol.EventSource.PROTOCOL, "first start up"))
         while (isActive) {
             logger.info("try start a round")
 
             if (!isKernelActive.get()) {
                 logger.warn("Kernel dormant, event ignored.")
+                @Suppress("MagicNumber")
                 delay(500)
                 continue
             }
@@ -128,16 +128,16 @@ class AgentKernel(
 
             val prompt = buildPrompt(batch)
 
-            try{
+            try {
                 processStreamRequest(memoryId, prompt)
             } catch (e: IOException) {
-                logger.error("Network IO error during reasoning",e)
+                logger.error("Network IO error during reasoning", e)
                 @Suppress("MagicNumber")
                 delay(200)
             } catch (e: SerializationException) {
-                logger.error("Protocol/Data serialization failed",e)
+                logger.error("Protocol/Data serialization failed", e)
             } catch (e: IllegalArgumentException) {
-                logger.error("Invalid arguments in LLM request",e)
+                logger.error("Invalid arguments in LLM request", e)
             }
         }
     }
@@ -152,10 +152,12 @@ class AgentKernel(
             switchMemory(memoryId)
             setSystemPrompt(memoryId, Protocol.SYSTEM_PROMPT)
 
-            fullResponse.append(prompt.stream { token ->
-                thoughtBuffer.append(token)
-                updateThinking(thoughtBuffer.toString())
-            })
+            fullResponse.append(
+                prompt.stream { token ->
+                    thoughtBuffer.append(token)
+                    updateThinking(thoughtBuffer.toString())
+                }
+            )
         }
 
         clearThinking()
