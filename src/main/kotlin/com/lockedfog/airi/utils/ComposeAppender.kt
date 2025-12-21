@@ -18,7 +18,6 @@ class ComposeAppender : AppenderBase<ILoggingEvent>() {
         .withZone(ZoneId.systemDefault())
 
     override fun append(eventObject: ILoggingEvent) {
-        @Suppress("TooGenericExceptionCaught")
         try {
             // 1. 尝试正常格式化时间
             val timestamp = timeFormatter.format(Instant.ofEpochMilli(eventObject.timeStamp))
@@ -53,6 +52,7 @@ class ComposeAppender : AppenderBase<ILoggingEvent>() {
             LogBuffer.add(fallbackLog)
         } catch (e: Exception) {
             addError("Failed to append fallback log", e)
+            throw e
         }
     }
 
